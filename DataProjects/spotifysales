@@ -1,21 +1,31 @@
+# Importing the pandas library for data manipulation
 import pandas as pd
 
+# Reading the Excel file into a DataFrame
 df = pd.read_excel(r'C:\Users\mrthb\OneDrive\Desktop\spotify2023.xlsx')
 
+# Printing the entire DataFrame to the console
 print(df.to_string())
 
+# Printing a concise summary of the DataFrame, including data types and non-null values
 print(df.info())
 
+# Dropping rows with any missing values
 clean1_df = df.dropna()
 
+# Printing the cleaned DataFrame to the console
 print(clean1_df.to_string())
 
+# Importing the matplotlib library for plotting
 import matplotlib.pyplot as plt
 
+# Plotting the cleaned DataFrame
 clean1_df.plot()
 plt.show()
 
-clean1_df.plot(kind = 'scatter', x = 'key', y = 'bpm')
+# Creating a scatter plot with 'key' on the x-axis and 'bpm' on the y-axis
+clean1_df.plot(kind='scatter', x='key', y='bpm')
 plt.show()
 
+# Saving the cleaned DataFrame to a CSV file
 clean1_df.to_csv(r'C:\Users\mrthb\OneDrive\Desktop\cleanspotify2023.csv', index=False)
