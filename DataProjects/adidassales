@@ -1,0 +1,139 @@
+# Importing necessary libraries
+import pandas as pd
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from pmdarima import auto_arima
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+# Setting pandas option to display all rows
+pd.set_option('display.max_rows', None)
+
+# Reading the Excel file into a DataFrame
+df = pd.read_excel(r'C:\Users\mrthb\OneDrive\Desktop\adidasussales.xlsx')
+
+# Printing the entire DataFrame to the console
+print(df.to_string())
+
+# Printing a concise summary of the DataFrame, including data types and non-null values
+print(df.info())
+
+# Dropping rows with any missing values
+clean1_df = df.dropna()
+
+# Printing the cleaned DataFrame to the console
+print(clean1_df.to_string())
+
+# Checking for duplicate rows in the cleaned DataFrame and printing the result
+print(clean1_df.duplicated())
+
+# Plotting the cleaned DataFrame
+clean1_df.plot()
+plt.show()
+
+# Saving the cleaned DataFrame to an Excel file
+clean1_df.to_excel(r'C:\Users\mrthb\OneDrive\Desktop\cleanadidassales.xlsx', index=False)
+
+# Filtering the DataFrame for rows where 'Total Sales' is greater than 300000
+filtered_df = clean1_df[clean1_df['Total Sales'] > 300000]
+
+# Sorting the filtered DataFrame by 'Total Sales' from highest to lowest
+filtered_df = filtered_df.sort_values(by='Total Sales', ascending=False)
+
+# Selecting only 'Retailer ID' and 'Total Sales' columns
+result_df = filtered_df[['Retailer ID', 'Total Sales']]
+
+# Displaying only the top 100 items
+result_df = result_df.head(100)
+
+# Printing the result
+print(result_df)
+
+# Plotting 'Retailer ID' vs 'Total Sales' for the top 100 items
+filtered_df[['Retailer ID', 'Total Sales']].plot()
+plt.show()
+
+# Grouping by 'State' and summing 'Total Sales'
+grouped_df = clean1_df.groupby('State')['Total Sales'].sum().reset_index()
+
+# Sorting the grouped DataFrame by 'Total Sales' in descending order
+grouped_df = grouped_df.sort_values(by='Total Sales', ascending=False)
+
+# Plotting the bar graph for total sales by state
+plt.figure(figsize=(30, 10))
+plt.bar(grouped_df['State'].astype(str), grouped_df['Total Sales'], color='skyblue')
+plt.xlabel('State')
+plt.ylabel('Total Sales')
+plt.title('Total Sales by State')
+plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
+plt.tight_layout()
+plt.show()
+
+# Printing the column names of the cleaned DataFrame
+print(clean1_df.columns.tolist())
+
+# Setting 'Invoice Date' as the index of the DataFrame
+clean1_df.set_index('Invoice Date', inplace=True)
+
+# Converting the index to datetime
+clean1_df.index = pd.to_datetime(clean1_df.index)
+
+# Resampling the data by month and summing the sales
+monthly_sales = clean1_df['Total Sales'].resample('M').sum()
+print("Monthly Sales:")
+print(monthly_sales,"\n")
+
+# Resampling the data by year and summing the sales
+yearly_sales = clean1_df['Total Sales'].resample('Y').sum()
+print("\nYearly Sales:")
+print(yearly_sales,"\n")
+
+# Specify the ARIMA model parameters
+p = 1  # Autoregressive order
+d = 1  # Non-seasonal differencing
+q = 1  # Moving average order
+P = 1  # Seasonal autoregressive order
+D = 0  # Seasonal differencing
+Q = 1  # Seasonal moving average order
+m = 12  # Seasonal period (for monthly data)
+
+# Fit the SARIMAX model
+model = SARIMAX(monthly_sales, order=(p, d, q), seasonal_order=(P, D, Q, m))
+model_fit = model.fit(disp=False)
+
+# Forecast the next 12 months
+forecast_steps = 12
+forecast = model_fit.get_forecast(steps=forecast_steps)
+forecasted_values = forecast.predicted_mean
+
+# Convert forecasted values to a pandas Series with datetime index
+forecasted_values = pd.Series(forecasted_values, index=pd.date_range('2022-01-31', periods=12, freq='M'))
+
+# Format forecasted values for Excel-like output
+formatted_forecast = forecasted_values.round(2).astype(str)
+
+# Print the monthly forecasted sales
+print("Monthly Forecasted Sales:")
+print(formatted_forecast)
+
+# Calculate the total forecasted sales for the next year in millions
+total_forecasted_sales_next_year = forecasted_values.sum()
+print(f"Total Forecasted Sales for the Next Year: {total_forecasted_sales_next_year:.1f} million")
+
+# Visualize the forecast
+plt.figure(figsize=(20, 6))
+plt.plot(monthly_sales.index, monthly_sales, label='Historical Sales')
+plt.plot(forecasted_values.index, forecasted_values, label='Forecasted Sales', color='red')
+plt.xlabel('Date')
+plt.ylabel('Sales')
+plt.title('Monthly Sales Forecast')
+plt.legend()
+
+# Set x-axis major locator and formatter
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+
+plt.xticks(rotation=45)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
