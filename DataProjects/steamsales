@@ -1,0 +1,30 @@
+# Importing the pandas library for data manipulation
+import pandas as pd
+
+# Reading the CSV file into a DataFrame
+df = pd.read_csv(r'C:\Users\mrthb\OneDrive\Desktop\steam200k.csv')
+
+# Printing the entire DataFrame to the console
+print(df.to_string())
+
+# Printing a concise summary of the DataFrame, including data types and non-null values
+print(df.info())
+
+# Dropping rows with any missing values
+clean1_df = df.dropna()
+
+# Printing the cleaned DataFrame to the console
+print(clean1_df.to_string())
+
+# Checking for duplicate rows in the cleaned DataFrame and printing the result
+print(clean1_df.duplicated())
+
+# Importing the matplotlib library for plotting
+import matplotlib.pyplot as plt
+
+# Plotting the cleaned DataFrame
+clean1_df.plot()
+plt.show()
+
+# Saving the cleaned DataFrame to an Excel file
+clean1_df.to_excel(r'C:\Users\mrthb\OneDrive\Desktop\cleansteamgamesales.xlsx', index=False)
