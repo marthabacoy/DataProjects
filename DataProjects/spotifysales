@@ -1,0 +1,21 @@
+import pandas as pd
+
+df = pd.read_excel(r'C:\Users\mrthb\OneDrive\Desktop\spotify2023.xlsx')
+
+print(df.to_string())
+
+print(df.info())
+
+clean1_df = df.dropna()
+
+print(clean1_df.to_string())
+
+import matplotlib.pyplot as plt
+
+clean1_df.plot()
+plt.show()
+
+clean1_df.plot(kind = 'scatter', x = 'key', y = 'bpm')
+plt.show()
+
+clean1_df.to_csv(r'C:\Users\mrthb\OneDrive\Desktop\cleanspotify2023.csv', index=False)
